@@ -60,7 +60,7 @@ bool at_eof() {
 }
 
 Token *new_token(TokenKind kind, Token *cur, char *str){
-    Token *tok = calloc(1, sizeof(token));
+    Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
     tok->str  = str;
     cur->next = tok;
@@ -101,13 +101,14 @@ int main ( int argc, char **argv){
         fprintf(stderr, "引数の個数が正しくない\n");
         return 1;
     }
-
     token = tokenize(argv[1]);
 
+    
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main:\n");
     printf("  mov rax, %d\n", expect_number());
+
 
     while(!at_eof()){
         if(consume('+')) {

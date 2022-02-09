@@ -1,8 +1,7 @@
 #include "mcc.h"
-#include "parse.c"
-#include "codegen.c"
 
-
+Token *token;
+char *user_input;
 
 int main ( int argc, char **argv){
     if ( argc != 2){

@@ -13,6 +13,12 @@ typedef enum {
 } TokenKind;
 
 typedef enum {
+    ND_EQ,
+    ND_NEQ,
+    ND_MOR,
+    ND_MOT,
+    ND_LES,
+    ND_LET,
     ND_ADD,
     ND_SUB,
     ND_MUL,
@@ -151,13 +157,52 @@ Node *new_node_num(int val) {
     return node;
 }
 
+Node *equality();
 Node *expr();
+Node *relational();
+Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
 
 
 Node *expr() {
+    Node *node = equality();
+
+    return node;
+}
+
+Node *equality() {
+    Node *node = relational();
+
+    for(;;) {
+        if(consume("=="))
+            node = new_node(ND_EQ, node, relational());
+        else if(consume("!="))
+            node = new_node(ND_NEQ, node, relational());
+        else
+            return node;
+    }
+}
+
+Node *relational() {
+    Node *node = add();
+
+    for(;;) {
+        if(consume("<"))
+            node = new_node(ND_LES, node, add());
+        else if(consume("<="))
+            node = new_node(ND_LET, node, add());
+        else if(consume(">"))
+            node = new_node(ND_MOR, node, add());
+        else if(consume("<="))
+            node = new_node(ND_MOT, node, add());
+        else 
+            return node;
+    }
+}
+
+Node *add() {
     Node *node = mul();
 
     for (;;) {

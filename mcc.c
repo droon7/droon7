@@ -13,17 +13,17 @@ typedef enum {
 } TokenKind;
 
 typedef enum {
+    ND_ADD,
+    ND_SUB,
+    ND_MUL,
+    ND_DIV,
+    ND_NUM,
     ND_EQ,
     ND_NEQ,
     ND_MOR,
     ND_MOT,
     ND_LES,
     ND_LET,
-    ND_ADD,
-    ND_SUB,
-    ND_MUL,
-    ND_DIV,
-    ND_NUM,
 } NodeKind;
 
 typedef struct Token Token;
@@ -273,6 +273,36 @@ void gen(Node *node) {
         case ND_DIV:
             printf("  cqo\n");
             printf("  idiv rdi\n");
+            break;
+        case ND_EQ:
+            printf("  cmp rax, rdi\n");
+            printf("  sete al\n");
+            printf("  movzb  rax, al\n");
+            break;
+        case ND_NEQ:
+            printf("  cmp rax, rdi\n");
+            printf("  setne al\n");
+            printf("  movzb  rax, al\n");
+            break;
+        case ND_MOR:
+            printf("  cmp rdi, rax\n");
+            printf("  setl al\n");
+            printf("  movzb  rax, al\n");
+            break;
+        case ND_MOT:
+            printf("  cmp rdi, rax\n");
+            printf("  setle al\n");
+            printf("  movzb  rax, al\n");
+            break;
+        case ND_LES:
+            printf("  cmp rax, rdi\n");
+            printf("  setl al\n");
+            printf("  movzb  rax, al\n");
+            break;
+        case ND_LET:
+            printf("  cmp rax, rdi\n");
+            printf("  setle al\n");
+            printf("  movzb  rax, al\n");
             break;
     }
 

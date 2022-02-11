@@ -11,6 +11,7 @@ typedef enum {
     TK_NUM,     //整数トークン
     TK_EOF,     //入力の終わり
     TK_IDENT,
+    TK_RETURN,
 } TokenKind;
 
 typedef enum {
@@ -27,6 +28,7 @@ typedef enum {
     ND_LET,
     ND_LVAR,
     ND_ASSIGN,
+    ND_RETURN,
 } NodeKind;
 
 typedef struct Token Token;
@@ -75,6 +77,7 @@ bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str);
 Token *tokenize(char *p);
 LVar *find_lvar(Token *tok);
+int is_alnum(char c);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

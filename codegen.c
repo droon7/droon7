@@ -28,7 +28,20 @@ Node *program() {
 }
 
 Node *stmt() {
-    Node *node = expr();
+    
+    Node *node;
+
+    //printf("stmt\n");
+
+    if ( consume("return")) {
+
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
+    } else {
+        node = expr();
+    }
+
     expect(";");
     return node;
 }
@@ -161,6 +174,13 @@ void gen(Node *node) {
     //printf("gen\n");
 
     switch (node->kind) {
+    case ND_RETURN:
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  mov rsp, rbp\n");
+        printf("  pop rbp\n");
+        printf("  ret\n");
+        return;
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

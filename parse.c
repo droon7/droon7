@@ -1,4 +1,14 @@
-#include  "mcc.h"
+#include"mcc.h"
+
+// エラーを報告するための関数
+// printfと同じ引数を取る
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
 
 void error_at(char *loc, char *fmt, ...){
     va_list ap;
@@ -22,11 +32,20 @@ bool consume(char *op){
     return true;
 }
 
+Token *consume_ident() {
+    if (token->kind != TK_IDENT ||token->len != 1)
+        return 0;
+
+    Token *tok = token;
+    token = token->next;
+    return token;
+}
+
 void expect(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
-        error_at(token->str, "'%C'ではありません",op);
+        error_at(token->str, "%sではありません",op);
     token = token->next;
 }
 
@@ -58,10 +77,21 @@ Token *tokenize(char *p) {
     Token *cur = &head;
 
     while (*p) {
+
+        //printf("%s\n",p);  //デバッグprintf
         if (isspace(*p)) {
             p++;
             continue;
         }
+
+
+        if ('a' <= *p && *p <= 'z') {
+            cur = new_token(TK_IDENT, cur, p++);
+            cur->len =1;
+            continue;
+        }
+
+
 
         if (!strncmp(p, ">=", 2) ||
             !strncmp(p, "<=", 2) ||
@@ -74,7 +104,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/()<>",*p)){
+        if (strchr("+-*/()<>=;",*p)){
             cur = new_token(TK_RESERVED, cur, p++);
             cur->len = 1;
             continue;

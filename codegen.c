@@ -41,13 +41,14 @@ Node *stmt() {
     }else if(consume("if")) {
         
         node = calloc(1, sizeof(Node));
+        node->rhs = calloc(1, sizeof(Node));
         node->kind = ND_IF;
         expect("(");
         node->lhs = expr();
         expect(")");
-        node->rhs = stmt();
+        node->rhs->lhs = stmt();
         if(consume("else"))
-            node->rhs->lhs = stmt();
+            node->rhs->rhs = stmt();
         return node;
 
     }else if(consume("while")) {
@@ -199,15 +200,17 @@ void gen(Node *node) {
         return;
     case ND_IF:
         gen(node->lhs);
+        int local_labelnum = labelnum++;
         printf("  pop rax\n");
         printf("  cmp rax, 0\n");
-        printf("  je  .Lelse%03d\n",labelnum);
-        gen(node->rhs);
-        printf("  jmp .Lend%03d\n",labelnum);
-        printf(".Lelse%03d:\n",labelnum);
+        printf("  je  .Lelse%03d\n",local_labelnum);
         gen(node->rhs->lhs);
-        printf(".Lend%03d:\n",labelnum);
-        labelnum++;
+        printf("  jmp .Lend%03d\n",local_labelnum);
+        printf(".Lelse%03d:\n",local_labelnum);
+        if(node->rhs->rhs)
+            gen(node->rhs->rhs);
+        printf(".Lend%03d:\n",local_labelnum);
+        return;
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

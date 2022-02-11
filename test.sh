@@ -40,5 +40,6 @@ b = 5 * 6 - 8;
 return a + b / 2;"
 assert 4 "a = 3;b = 4; if(a == b -1) return 4;"
 assert 5 "a = 3;b = 4; if(a != b -1) return 4; else return 5;"
+assert 6 "a = 3;b = 4; if(a != b -1) return 4; else if ( a == 3) return 6;"
 
 echo OK

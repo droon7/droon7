@@ -199,15 +199,15 @@ void gen(Node *node) {
         return;
     case ND_IF:
         gen(node->lhs);
+        int local_labelnum = labelnum++;
         printf("  pop rax\n");
         printf("  cmp rax, 0\n");
-        printf("  je  .Lelse%03d\n",labelnum);
+        printf("  je  .Lelse%03d\n",local_labelnum);
         gen(node->rhs);
-        printf("  jmp .Lend%03d\n",labelnum);
-        printf(".Lelse%03d:\n",labelnum);
+        printf("  jmp .Lend%03d\n",local_labelnum);
+        printf(".Lelse%03d:\n",local_labelnum);
         gen(node->rhs->lhs);
-        printf(".Lend%03d:\n",labelnum);
-        labelnum++;
+        printf(".Lend%03d:\n",local_labelnum);
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

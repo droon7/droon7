@@ -39,6 +39,15 @@ bool consume(char *op){
     return true;
 }
 
+bool is_next_token(char *op) {
+    //printf("tok->nex->str = %s\n",token->next->str);
+    //printf("op = %s\n",op);
+    //printf("tok->nex->len = %d\n",token->next->len);
+    if (memcmp(token->str, op, token->len ))
+        return false;
+    return true;
+}
+
 Token *consume_ident() {
     if (token->kind != TK_IDENT )
         return 0;
@@ -49,6 +58,7 @@ Token *consume_ident() {
 }
 
 void expect(char *op) {
+    //printf("%s\n",op);
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))

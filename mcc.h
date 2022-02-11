@@ -82,11 +82,13 @@ bool consume(char *op);
 Token *consume_ident();
 void expect(char *op);
 int expect_number();
+
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str);
 Token *tokenize(char *p);
 LVar *find_lvar(Token *tok);
 int is_alnum(char c);
+bool is_next_token(char *op);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

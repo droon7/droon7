@@ -53,7 +53,33 @@ Node *stmt() {
 
     }else if(consume("while")) {
 
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        expect("(");
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        return node;
+
     }else if(consume("for")) {
+        node = calloc(1, sizeof(Node));
+        node->rhs = calloc(1, sizeof(Node));
+        node->lhs = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        expect("(");
+
+        //printf("%d\n", is_next_token(";"));
+        if(!is_next_token(";"))
+            node->lhs->lhs = expr();
+        expect(";");
+        if(!is_next_token(";"))
+            node->lhs->rhs = expr();
+        expect(";");
+        if(!is_next_token(")"))
+            node->rhs->lhs = expr();
+        expect(")");
+        node->rhs->rhs = stmt();
+        return node;
 
     }else {
         node = expr();
@@ -64,6 +90,7 @@ Node *stmt() {
 }
 
 Node *expr() {
+    //printf("expr\n");
     Node *node = assign();
 
     return node;
@@ -189,6 +216,7 @@ void gen_lval(Node *node) {
 void gen(Node *node) {
 
     //printf("gen\n");
+    int local_labelnum = labelnum;
 
     switch (node->kind) {
     case ND_RETURN:
@@ -199,8 +227,8 @@ void gen(Node *node) {
         printf("  ret\n");
         return;
     case ND_IF:
+        labelnum++;
         gen(node->lhs);
-        int local_labelnum = labelnum++;
         printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  je  .Lelse%03d\n",local_labelnum);
@@ -209,6 +237,34 @@ void gen(Node *node) {
         printf(".Lelse%03d:\n",local_labelnum);
         if(node->rhs->rhs)
             gen(node->rhs->rhs);
+        printf(".Lend%03d:\n",local_labelnum);
+        return;
+    case ND_WHILE:
+        labelnum++;
+        printf(".Lbegin%03d:\n",local_labelnum);
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je  .Lend%03d\n",local_labelnum);
+        gen(node->rhs);
+        printf("  jmp  .Lbegin%03d\n",local_labelnum);
+        printf(".Lend%03d:\n",local_labelnum);
+        return;
+
+    case ND_FOR:
+        labelnum++;
+        if(node->lhs->lhs)
+            gen(node->lhs->lhs);
+        printf(".Lbegin%03d:\n",local_labelnum);
+        if(node->lhs->rhs)
+            gen(node->lhs->rhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je .Lend%03d\n",local_labelnum);
+        gen(node->rhs->rhs);
+        if(node->rhs->lhs)
+            gen(node->rhs->lhs);
+        printf("  jmp .Lbegin%03d\n",local_labelnum);
         printf(".Lend%03d:\n",local_labelnum);
         return;
     case ND_NUM:

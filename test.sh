@@ -41,6 +41,14 @@ return a + b / 2;"
 assert 4 "a = 3;b = 4; if(a == b -1) return 4;"
 assert 5 "a = 3;b = 4; if(a != b -1) return 4; else return 5;"
 assert 6 "a = 3;b = 4; if(a != b -1) return 4; else if ( a == 3) if ( b == 4) return 6;"
-
+assert 3 "i = 0; 
+while( i != 3 ) i = i+ 1;"
+assert 2 "i = 0;
+while( i > 3) return 3;
+return 2;"
+assert 4 "i = 0; j = 0; for( i = 0; i <4; i = i + 1) j = j+1;
+return j;
+"
+assert 3 "i = 0; for(;i < 3;)i = i + 1;"
 
 echo OK

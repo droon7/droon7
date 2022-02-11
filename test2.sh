@@ -1,4 +1,4 @@
 #!/bin/bash
-./mcc "a = 3;b = 4; if(a != b -1) return 4;"
-#./mcc "a = 3;b = 4; if(a != b -1) return 40; else return 5;"
-
+#./mcc "i = 0; 
+#while( i == 3 ) i = i+ 1;"
+./mcc "int = 0; for ( ;int < 3;)int = int + 1;"

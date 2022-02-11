@@ -32,6 +32,7 @@ assert 1 "1 <= 1;"
 assert 1 "2 > 1;"
 assert 1 "1 >= 1;"
 assert 4 "a = 3 + 3; b = 5 - 1;"
-assert 6 "z = 3 + 3;"
+assert 7 "z = 3 + 3;a = 2 - 1;2 + z - a ;"
+assert 8 "abcd = 8;"
 
 echo OK

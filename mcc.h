@@ -33,6 +33,8 @@ typedef struct Token Token;
 
 typedef struct Node Node;
 
+typedef struct LVar LVar;
+
 // トークン型
 struct Token {
     TokenKind kind; //トークンの型
@@ -50,9 +52,17 @@ struct Node {
     int offset; //kindがND_LVARのみ使用
 };
 
+struct LVar {
+    LVar *next;
+    char *name;
+    int len;
+    int offset;
+};
+
 extern Token *token;
 extern char *user_input;
 extern Node *code[100];
+extern LVar *locals;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
@@ -64,6 +74,7 @@ int expect_number();
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str);
 Token *tokenize(char *p);
+LVar *find_lvar(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

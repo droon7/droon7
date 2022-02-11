@@ -33,12 +33,12 @@ bool consume(char *op){
 }
 
 Token *consume_ident() {
-    if (token->kind != TK_IDENT ||token->len != 1)
+    if (token->kind != TK_IDENT )
         return 0;
 
     Token *tok = token;
     token = token->next;
-    return token;
+    return tok;
 }
 
 void expect(char *op) {
@@ -61,6 +61,13 @@ int expect_number(){
 
 bool at_eof() {
     return token->kind == TK_EOF;
+}
+
+LVar *find_lvar(Token *tok) {
+    for (LVar *var = locals; var; var = var->next)
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+            return var;
+    return NULL;
 }
 
 Token *new_token(TokenKind kind, Token *cur, char *str){
@@ -86,8 +93,15 @@ Token *tokenize(char *p) {
 
 
         if ('a' <= *p && *p <= 'z') {
-            cur = new_token(TK_IDENT, cur, p++);
-            cur->len =1;
+            //printf("%s\n",p);
+            cur = new_token(TK_IDENT, cur, p);
+            
+            int local_len=0;
+            while(!isspace(*p)) {
+                local_len++;
+                p++;
+            }
+            cur->len = local_len;
             continue;
         }
 

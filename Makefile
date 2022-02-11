@@ -10,7 +10,10 @@ $(OBJS): mcc.h
 test: mcc
 		./test.sh
 
+test2: mcc
+		./test2.sh
+
 clean:
 		rm -f 9cc *.o *~ tmp*
 
-.PHONY: test clean
+.PHONY: test clean test2

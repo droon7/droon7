@@ -3,12 +3,16 @@
 Token *token;
 char *user_input;
 Node *code[100];
+LVar *locals ;
+
 
 int main ( int argc, char **argv){
     if ( argc != 2){
         fprintf(stderr, "引数の個数が正しくない\n");
         return 1;
     }
+
+    locals = calloc(1,sizeof(LVar));
 
     //トークナイズしてパースする
     user_input = argv[1];
@@ -30,6 +34,8 @@ int main ( int argc, char **argv){
     for(int i = 0; code[i]; i++) {
         gen(code[i]);
 
+        // 式の評価結果としてスタックに一つの値が残っている
+        // はずなので、スタックが溢れないようにポップしておく
         printf("  pop rax\n");
     }
 

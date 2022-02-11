@@ -2,6 +2,7 @@
 
 
 
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
@@ -18,6 +19,8 @@ Node *new_node_num(int val) {
 }
 
 Node *program() {
+
+    //printf("program\n");
     int i = 0;
     while (!at_eof())
         code[i++] = stmt();
@@ -117,10 +120,23 @@ Node *primary() {
     }
 
     Token *tok = consume_ident();
+
     if (tok) {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        node->offset = (tok->str[0] - 'a' + 1) * 8;
+
+        LVar *lvar = find_lvar(tok);
+        if (lvar) {
+            node->offset = lvar->offset;
+        } else {
+            lvar = calloc(1, sizeof(LVar));
+            lvar->next = locals;
+            lvar->name = tok->str;
+            lvar->len = tok->len;
+            lvar->offset = locals->offset + 8;
+            node->offset = lvar->offset;
+            locals = lvar;
+        }
         return node;
     }
 
@@ -128,8 +144,8 @@ Node *primary() {
 }
 
 
-//コードジェネレーター、構文木からコードを出力する。
 
+//変数のアドレスをプッシュ
 void gen_lval(Node *node) {
     if (node->kind != ND_LVAR)
         error("代入の左辺値が変数ではありません");
@@ -138,7 +154,11 @@ void gen_lval(Node *node) {
     printf("  sub rax, %d\n", node->offset);
     printf("  push rax\n");
 }
+
+//コードジェネレーター、構文木からコードを出力する。
 void gen(Node *node) {
+
+    //printf("gen\n");
 
     switch (node->kind) {
     case ND_NUM:
@@ -146,18 +166,18 @@ void gen(Node *node) {
         return;
     case ND_LVAR:
         gen_lval(node);
-        printf("  pop rax\n");
-        printf("  mov rax, [rax]\n");
-        printf("  push rax\n");
+        printf("  pop rax\n"); //アドレスをポップ
+        printf("  mov rax, [rax]\n");//アドレスにストアされてる値をロード
+        printf("  push rax\n");//値をプッシュ
         return;
     case ND_ASSIGN:
         gen_lval(node->lhs);
         gen(node->rhs);
 
-        printf("  pop rdi\n");
-        printf("  pop rax\n");
-        printf("  mov [rax], rdi\n");
-        printf("  push rdi\n");
+        printf("  pop rdi\n"); //gen(node->rhs)からの数値をポップ
+        printf("  pop rax\n");// gen_lval(node->lhs)からのアドレスをポップ
+        printf("  mov [rax], rdi\n"); //rdi（値）をrax（アドレス)にストア
+        printf("  push rdi\n");// 値をプッシュ
         return;
     }
 
@@ -167,7 +187,7 @@ void gen(Node *node) {
     printf("  pop rdi\n");
     printf("  pop rax\n");
 
-    switch (node->kind){  //右辺値を評価するswitch文
+    switch (node->kind){  //右辺値を評価するswitch文?
         case ND_ADD:
             printf("  add rax, rdi\n");
             break;

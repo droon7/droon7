@@ -1,7 +1,7 @@
 #include"mcc.h"
 
 
-
+//文脈自由文法のBNF木による構造二分木を構成
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
     Node *node = calloc(1, sizeof(Node));
@@ -38,7 +38,23 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
-    } else {
+    }else if(consume("if")) {
+        
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        expect("(");
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        if(consume("else"))
+            node->rhs->lhs = stmt();
+        return node;
+
+    }else if(consume("while")) {
+
+    }else if(consume("for")) {
+
+    }else {
         node = expr();
     }
 
@@ -181,6 +197,17 @@ void gen(Node *node) {
         printf("  pop rbp\n");
         printf("  ret\n");
         return;
+    case ND_IF:
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je  .Lelse%03d\n",labelnum);
+        gen(node->rhs);
+        printf("  jmp .Lend%03d\n",labelnum);
+        printf(".Lelse%03d:\n",labelnum);
+        gen(node->rhs->lhs);
+        printf(".Lend%03d:\n",labelnum);
+        labelnum++;
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

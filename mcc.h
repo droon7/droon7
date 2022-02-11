@@ -12,6 +12,10 @@ typedef enum {
     TK_EOF,     //入力の終わり
     TK_IDENT,
     TK_RETURN,
+    TK_IF,
+    TK_ELSE,
+    TK_WHILE,
+    TK_FOR,
 } TokenKind;
 
 typedef enum {
@@ -29,6 +33,10 @@ typedef enum {
     ND_LVAR,
     ND_ASSIGN,
     ND_RETURN,
+    ND_IF,
+    ND_ELSE,
+    ND_WHILE,
+    ND_FOR,
 } NodeKind;
 
 typedef struct Token Token;
@@ -65,6 +73,7 @@ extern Token *token;
 extern char *user_input;
 extern Node *code[100];
 extern LVar *locals;
+extern int labelnum;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);

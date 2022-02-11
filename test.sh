@@ -35,5 +35,10 @@ assert 4 "a = 3 + 3; b = 5 - 1;"
 assert 7 "z = 3 + 3;a = 2 - 1;2 + z - a ;"
 assert 11 "ab = 3;ab = 3;cd = 5;df = 3; return ab + cd + df;"
 assert 4 "return 4;"
+assert 14  "a = 3;
+b = 5 * 6 - 8;
+return a + b / 2;"
+assert 4 "a = 3;b = 4; if(a == b -1) return 4;"
+assert 5 "a = 3;b = 4; if(a != b -1) return 4; else return 5;"
 
 echo OK

@@ -4,7 +4,7 @@ Token *token;
 char *user_input;
 Node *code[100];
 LVar *locals ;
-
+int labelnum;
 
 int main ( int argc, char **argv){
     if ( argc != 2){
@@ -13,6 +13,7 @@ int main ( int argc, char **argv){
     }
 
     locals = calloc(1,sizeof(LVar));
+    labelnum = 0;
 
     //トークナイズしてパースする
     user_input = argv[1];

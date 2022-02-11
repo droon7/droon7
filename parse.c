@@ -112,6 +112,34 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (strncmp(p, "if", 2) == 0 && !is_alnum(p[2])) {
+            cur = new_token(TK_IF, cur, p);
+            p += 2;
+            cur->len = 2;
+            continue;
+        }
+
+        if (strncmp(p, "else", 4) == 0 && !is_alnum(p[4])) {
+            cur = new_token(TK_ELSE, cur, p);
+            p += 4;
+            cur->len = 4;
+            continue;
+        }
+
+        if (strncmp(p, "while", 5) == 0 && !is_alnum(p[5])){
+            cur = new_token(TK_WHILE, cur, p);
+            p += 5;
+            cur->len = 5;
+            continue;
+        }
+
+        if (strncmp(p, "for", 3) == 0 && !is_alnum(p[3])){
+            cur = new_token(TK_FOR, cur, p);
+            p += 3;
+            cur->len = 3;
+            continue;
+        }
+
         if ('a' <= *p && *p <= 'z') {
             //printf("%s\n",p);
             cur = new_token(TK_IDENT, cur, p);

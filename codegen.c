@@ -68,14 +68,14 @@ Node *stmt() {
         node->kind = ND_FOR;
         expect("(");
 
-        //printf("%d\n", is_next_token(";"));
-        if(!is_next_token(";"))
+        //printf("%d\n", is_token(";"));
+        if(!is_token(";"))
             node->lhs->lhs = expr();
         expect(";");
-        if(!is_next_token(";"))
+        if(!is_token(";"))
             node->lhs->rhs = expr();
         expect(";");
-        if(!is_next_token(")"))
+        if(!is_token(")"))
             node->rhs->lhs = expr();
         expect(")");
         node->rhs->rhs = stmt();
@@ -87,12 +87,16 @@ Node *stmt() {
         int i =0;
         node = calloc(1,sizeof(Node));
         node->kind = ND_BLOCK;
-
+        Node head = {};
+        Node *cur = &head;
         while(!consume("}")){
-            node->block_code[i] = calloc(1,sizeof(Node));
-            node->block_code[i++] = stmt();
-            //gen(node->block_code[i]);
+            //  printf("i = %d\n",i++);
+            cur->next = calloc(1,sizeof(Node));
+            cur->next = stmt();
+            cur = cur->next;
+            // gen(cur);
         }
+        node->block_code = head.next ;
         return node;
 
     }else {
@@ -192,7 +196,15 @@ Node *primary() {
 
     Token *tok = consume_ident();
 
-    if (tok) {
+    
+    if(tok && consume("(")){                //関数をパースする
+        Node *node = calloc(1,sizeof(Node));
+        node->kind = ND_FUNC_CALL;
+        strcpy(node->funcname, tok->str);
+        node->funcname[tok->len] = '\0';
+        expect(")");
+        return node;
+    }else if (tok) {                         //変数をパースする
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 
@@ -208,6 +220,7 @@ Node *primary() {
             node->offset = lvar->offset;
             locals = lvar;
         }
+
         return node;
     }
 
@@ -223,7 +236,7 @@ void gen_lval(Node *node) {
 
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->offset);
-    printf("  push rax\n");
+    printf("  push rax\n"); count_for_allign16byte -= 1;
 }
 
 //コードジェネレーター、構文木からコードを出力する。
@@ -231,20 +244,20 @@ void gen(Node *node) {
 
     //printf("gen\n");
     int local_labelnum = labelnum;
-    int block_num = 0;
+    Node *n ;
 
     switch (node->kind) {
     case ND_RETURN:
         gen(node->lhs);
-        printf("  pop rax\n");
+        printf("  pop rax\n"); count_for_allign16byte += 1;
         printf("  mov rsp, rbp\n");
-        printf("  pop rbp\n");
+        printf("  pop rbp\n"); count_for_allign16byte += 1;
         printf("  ret\n");
         return;
     case ND_IF:
         labelnum++;
         gen(node->lhs);
-        printf("  pop rax\n");
+        printf("  pop rax\n"); count_for_allign16byte += 1;
         printf("  cmp rax, 0\n");
         printf("  je  .Lelse%03d\n",local_labelnum);
         gen(node->rhs->lhs);
@@ -258,7 +271,7 @@ void gen(Node *node) {
         labelnum++;
         printf(".Lbegin%03d:\n",local_labelnum);
         gen(node->lhs);
-        printf("  pop rax\n");
+        printf("  pop rax\n"); count_for_allign16byte += 1;
         printf("  cmp rax, 0\n");
         printf("  je  .Lend%03d\n",local_labelnum);
         gen(node->rhs);
@@ -273,7 +286,7 @@ void gen(Node *node) {
         printf(".Lbegin%03d:\n",local_labelnum);
         if(node->lhs->rhs)
             gen(node->lhs->rhs);
-        printf("  pop rax\n");
+        printf("  pop rax\n"); count_for_allign16byte += 1;
         printf("  cmp rax, 0\n");
         printf("  je .Lend%03d\n",local_labelnum);
         gen(node->rhs->rhs);
@@ -286,29 +299,37 @@ void gen(Node *node) {
     case ND_BLOCK:
 
         // printf("ND_BLOCK\n");
-        while(node->block_code[block_num]){
-            gen(node->block_code[block_num++]);
+        // printf("%d",node->block_code);
+        n = node->block_code;
+        while(n) {
+            gen(n);
+            n = n->next;
+            // block_num++;
         }
-        printf("  pop rax\n");
+        //printf("  pop rax\n"); count_for_allign16byte += 1;
 
         return ;
+    case ND_FUNC_CALL:
+        printf("  mov 0, rax\n");
+        printf("  call %s", node->funcname);
+
     case ND_NUM:
-        printf("  push %d\n", node->val);
+        printf("  push %d\n", node->val);count_for_allign16byte -= 1;
         return;
     case ND_LVAR:
         gen_lval(node);
-        printf("  pop rax\n"); //アドレスをポップ
+        printf("  pop rax\n"); count_for_allign16byte += 1; //アドレスをポップ
         printf("  mov rax, [rax]\n");//アドレスにストアされてる値をロード
-        printf("  push rax\n");//値をプッシュ
+        printf("  push rax\n");count_for_allign16byte -= 1;//値をプッシュ
         return;
     case ND_ASSIGN:
         gen_lval(node->lhs);
         gen(node->rhs);
 
         printf("  pop rdi\n"); //gen(node->rhs)からの数値をポップ
-        printf("  pop rax\n");// gen_lval(node->lhs)からのアドレスをポップ
+        printf("  pop rax\n"); count_for_allign16byte += 1;// gen_lval(node->lhs)からのアドレスをポップ
         printf("  mov [rax], rdi\n"); //rdi（値）をrax（アドレス)にストア
-        printf("  push rdi\n");// 値をプッシュ
+        printf("  push rdi\n"); count_for_allign16byte -= 1;// 値をプッシュ
         return;
     }
 
@@ -316,7 +337,7 @@ void gen(Node *node) {
     gen(node->rhs);
 
     printf("  pop rdi\n");
-    printf("  pop rax\n");
+    printf("  pop rax\n"); count_for_allign16byte += 1;
 
     switch (node->kind){  //右辺値を評価するswitch文?
         case ND_ADD:
@@ -364,5 +385,5 @@ void gen(Node *node) {
             break;
     }
 
-    printf("  push rax\n");
+    printf("  push rax\n");count_for_allign16byte -= 1;
 }

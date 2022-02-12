@@ -38,6 +38,7 @@ typedef enum {
     ND_WHILE,
     ND_FOR,
     ND_BLOCK,
+    ND_FUNC_CALL,
 } NodeKind;
 
 typedef struct Token Token;
@@ -61,7 +62,10 @@ struct Node {
     Node *rhs;  //右辺
     int val;    //kindがND_NUMの場合のみ使用
     int offset; //kindがND_LVARのみ使用
-    Node *block_code[]; //ブロック内のノードを格納する
+    char *funcname;
+    Node *args;
+    Node *block_code; //ブロック内のノードを格納する
+    Node *next;
 };
 
 struct LVar {
@@ -76,6 +80,8 @@ extern char *user_input;
 extern Node *code[100];
 extern LVar *locals;
 extern int labelnum;
+extern char *argreg[];
+extern int count_for_allign16byte;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
@@ -90,7 +96,8 @@ Token *new_token(TokenKind kind, Token *cur, char *str);
 Token *tokenize(char *p);
 LVar *find_lvar(Token *tok);
 int is_alnum(char c);
-bool is_next_token(char *op);
+bool is_token(char *op);
+bool is_nodekind(Node *n, int kind);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

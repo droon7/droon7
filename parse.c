@@ -40,7 +40,14 @@ bool consume(char *op){
     return true;
 }
 
-bool is_next_token(char *op) {
+bool is_nodekind(Node *n, int kind) {
+    if(n->kind != kind){
+        return false;
+    }
+    return true;
+}
+
+bool is_token(char *op) {
     //printf("tok->nex->str = %s\n",token->next->str);
     //printf("op = %s\n",op);
     //printf("tok->nex->len = %d\n",token->next->len);

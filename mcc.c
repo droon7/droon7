@@ -17,6 +17,8 @@ int main ( int argc, char **argv){
 
     //トークナイズしてパースする
     user_input = argv[1];
+
+    // printf("main\n");
     token = tokenize(user_input);
     program();
     

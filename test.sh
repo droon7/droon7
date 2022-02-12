@@ -50,5 +50,11 @@ assert 4 "i = 0; j = 0; for( i = 0; i <4; i = i + 1) j = j+1;
 return j;
 "
 assert 3 "i = 0; for(;i < 3;)i = i + 1;"
+assert 25 "j = 0; k = 0;for(i = 0; i < 5;i = i + 1 ) {
+    j = 2 + j ;
+    k = 3 + k ;
+    }
+    return j + k;
+    "
 
 echo OK

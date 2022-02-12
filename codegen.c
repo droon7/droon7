@@ -20,7 +20,7 @@ Node *new_node_num(int val) {
 
 Node *program() {
 
-    //printf("program\n");
+    // printf("program\n");
     int i = 0;
     while (!at_eof())
         code[i++] = stmt();
@@ -79,6 +79,20 @@ Node *stmt() {
             node->rhs->lhs = expr();
         expect(")");
         node->rhs->rhs = stmt();
+        return node;
+
+    }else if(consume("{")) {
+
+        // printf("block_parse/n");
+        int i =0;
+        node = calloc(1,sizeof(Node));
+        node->kind = ND_BLOCK;
+
+        while(!consume("}")){
+            node->block_code[i] = calloc(1,sizeof(Node));
+            node->block_code[i++] = stmt();
+            //gen(node->block_code[i]);
+        }
         return node;
 
     }else {
@@ -217,6 +231,7 @@ void gen(Node *node) {
 
     //printf("gen\n");
     int local_labelnum = labelnum;
+    int block_num = 0;
 
     switch (node->kind) {
     case ND_RETURN:
@@ -267,6 +282,16 @@ void gen(Node *node) {
         printf("  jmp .Lbegin%03d\n",local_labelnum);
         printf(".Lend%03d:\n",local_labelnum);
         return;
+
+    case ND_BLOCK:
+
+        // printf("ND_BLOCK\n");
+        while(node->block_code[block_num]){
+            gen(node->block_code[block_num++]);
+        }
+        printf("  pop rax\n");
+
+        return ;
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

@@ -26,7 +26,7 @@ void error_at(char *loc, char *fmt, ...){
 bool consume(char *op){
 
     // デバッグ
-    //printf("op = %s\n",op);
+    // printf("op = %s\n",op);
     //printf("token->str = %s\n",token->str);
     //printf("token->len = %d\n",token->len);
     //printf("strlen(op)->len = %d\n",strlen(op));
@@ -36,6 +36,7 @@ bool consume(char *op){
         memcmp(token->str, op, token->len))
         return false;
     token = token->next;
+    // printf("true\n");
     return true;
 }
 
@@ -176,7 +177,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/()<>=;",*p)){
+        if (strchr("+-*/()<>=;{}",*p)){
             cur = new_token(TK_RESERVED, cur, p++);
             cur->len = 1;
             continue;
